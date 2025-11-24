@@ -1,0 +1,5 @@
+uvicorn app.main:app --reload
+redis-server
+celery -A app.worker.tasks worker -E
+celery -A app.worker.tasks flower
+alembic revision -m "message" -- autogenerate

@@ -1,6 +1,7 @@
 from time import perf_counter
 
 from fastapi import FastAPI, Request, Response
+from fastapi.routing import APIRoute
 from scalar_fastapi import get_scalar_api_reference
 
 from app.api.tag import APITag
@@ -27,6 +28,10 @@ Delivery Management System for sellers and delivery agents
 - Track and update shipment status
 - Email and SMS notifications
 """
+
+def custom_generate_unique_id_function(route: APIRoute):
+    return route.name
+
 app = FastAPI(
     title = "FastShip", 
     description=description,
@@ -42,8 +47,8 @@ app = FastAPI(
         {"name" : APITag.SHIPMENT, "description" : "Operations related to shipments"},
         {"name" : APITag.SELLER, "description" : "Operations related to sellers"},
         {"name" : APITag.PARTNER, "description" : "Operations related to partners"},
-    ]
-    
+    ],
+    generate_unique_id_function=custom_generate_unique_id_function,
 )
 app.add_middleware(
     CORSMiddleware,
@@ -56,17 +61,6 @@ app.include_router(master_router)
 
 # Add custom exception handlers
 add_exception_handlers(app)
-
-@app.middleware("http")
-async def custom_middleware(request: Request, call_next):
-    start = perf_counter()
-
-    response : Response = await call_next(request)
-    end = perf_counter()
-    time_taken = round(end-start, 2)
-    add_log.delay(f"{request.method} {request.url} ({response.status_code}) {time_taken}s")
-    
-    return response
 
 ### Server running status
 @app.get("/")

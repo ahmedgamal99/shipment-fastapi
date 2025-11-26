@@ -18,10 +18,10 @@ class DeliveryPartnerService(UserService):
         for zip_code in delivery_partner.serviceable_zip_codes:
             location = await self.session.get(Location, zip_code)
             partner.servicable_locations.append(
-                location if location else Location(zip_code)
+                location if location else Location(zip_code=zip_code)
             )
 
-        return self._update(partner)
+        return await self._update(partner)
 
     async def get_partners_by_zipcode(self, zipcode: int) -> Sequence[DeliveryPartner]:
         # await scalars() to get a ScalarResult, then call .all()

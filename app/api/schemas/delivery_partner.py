@@ -1,11 +1,13 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
 class BaseDeliveryPartner(BaseModel):
     name: str
     email: EmailStr
-    serviceable_zip_codes : list[int]
-    max_handling_capacity : int
+    serviceable_zip_codes: list[int]
+    max_handling_capacity: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 class DeliveryPartnerRead(BaseDeliveryPartner):
     pass

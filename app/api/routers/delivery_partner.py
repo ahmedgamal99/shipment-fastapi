@@ -1,6 +1,8 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from pydantic import EmailStr
+from app.api.schemas.shipment import ShipmentRead
 from app.api.tag import APITag
 from app.core.exceptions import NothingToUpdate
 from fastapi.security import OAuth2PasswordRequestForm
@@ -36,6 +38,11 @@ async def login_delivery_partner(
     token = await service.token(request_form.username, request_form.password)
     return {"access_token": token, "type": "jwt"}
 
+### Email Password Reset Link
+@router.get("/forgot_password")
+async def forgot_password(email: EmailStr, service: DeliveryPartnerServiceDep):
+    await service.send_password_reset_link(email, router.prefix)
+    return {"detail": "Check your email for password reset link"}
 
 ### Update the delivery partner
 @router.post("/", response_model=DeliveryPartnerRead)
@@ -52,6 +59,13 @@ async def update_delivery_partner(
 
     return await service.update(partner.sqlmodel_update(update))
 
+@router.get("/me", response_model=DeliveryPartnerRead)
+async def get_delivery_partner(partner: DeliveryPartnerDep):
+    return partner
+
+@router.get("/shipments", response_model=list[ShipmentRead])
+async def get_shipments(partner: DeliveryPartnerDep):
+    return partner.shipments
 
 ### Verify Seller Account
 @router.get("/verify")

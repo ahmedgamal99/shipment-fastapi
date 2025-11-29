@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request
@@ -5,8 +6,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
 from pydantic import EmailStr
 
-from app.api.dependencies import SellerServiceDep, get_seller_access_token
+from app.api.dependencies import SellerDep, SellerServiceDep, get_seller_access_token
+from app.api.schemas.shipment import ShipmentRead
 from app.api.tag import APITag
+from app.core.security import TokenData
 from app.database.redis import add_jti_to_blacklist
 
 from app.api.schemas.seller import SellerCreate, SellerRead
@@ -21,14 +24,17 @@ async def register_seller(seller: SellerCreate, service: SellerServiceDep):
     return await service.add(seller)
 
 
-@router.post("/token")
+@router.post("/token", response_model = TokenData)
 async def login_seller(
     request_form: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: SellerServiceDep,
 ):
     token = await service.token(request_form.username, request_form.password)
-    return {"access_token": token, "type": "jwt"}
+    return {"access_token": token, "token_type": "jwt"}
 
+@router.get("/me", response_model=SellerRead)
+async def get_seller(seller: SellerDep):
+    return seller
 
 ### Verify Seller Account
 @router.get("/verify")
@@ -36,6 +42,11 @@ async def verify_seller_email(token: str, service: SellerServiceDep):
     await service.verify_email(token)
     return {"detail": "Account Verified"}
 
+### Get all shipments for the authenticated seller
+@router.get("/shipments", response_model=list[ShipmentRead])
+async def get_shipments(seller: SellerDep):
+    print("HERE!!!!!!!: " , seller.shipments)
+    return seller.shipments
 
 ### Email Password Reset Link
 @router.get("/forgot_password")

@@ -68,7 +68,6 @@ async def get_tracking(request: Request, id: str, service: ShipmentServiceDep):
 
     return templates.TemplateResponse("track.html", context_with_request)
 
-
 ### Create a new shipment with content and weight
 @router.post(
     "/",

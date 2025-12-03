@@ -45,7 +45,6 @@ async def verify_seller_email(token: str, service: SellerServiceDep):
 ### Get all shipments for the authenticated seller
 @router.get("/shipments", response_model=list[ShipmentRead])
 async def get_shipments(seller: SellerDep):
-    print("HERE!!!!!!!: " , seller.shipments)
     return seller.shipments
 
 ### Email Password Reset Link

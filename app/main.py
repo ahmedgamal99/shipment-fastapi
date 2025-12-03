@@ -1,13 +1,10 @@
-from time import perf_counter
-
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from scalar_fastapi import get_scalar_api_reference
 
 from app.api.tag import APITag
 from app.core.exceptions import add_exception_handlers
 from app.api.router import master_router
-from app.worker.tasks import add_log
 from fastapi.middleware.cors import CORSMiddleware
 
 # @asynccontextmanager
